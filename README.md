@@ -7,7 +7,7 @@ A simple solution to effectively scale DynamoDB capacity provisioning based. Oth
 
 ![Scaling](scale1.PNG)
 
-![Scaling](scale2.png)
+![Scaling](scale2.PNG)
 
 ## Usage
 
