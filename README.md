@@ -21,10 +21,11 @@ A simple solution to effectively scale DynamoDB capacity provisioning. Other sol
 	2. Enter a function name.
 	3. Ensure Node.js 4.3 is selected as the Runtime
 	4. Upload the zip you created earlier.
-	5. Choose the role you created earlier.
-	6. For Memory, chose the max value.
-	7. For timeout, typical duration for processing 20 tables is around 1 second. Set a timeout appropriate to your usage.
-	8. Add an event source of type CloudWatch Events - Schedule. Set a rate of 1 minute.
+	5. Leave the Handler as index.handler.
+	6. Choose the role you created earlier.
+	7. For Memory, chose the max value.
+	8. For timeout, typical duration for processing 20 tables is around 1 second. Set a timeout appropriate to your usage.
+	9. Add an event source of type CloudWatch Events - Schedule. Set a rate of 1 minute.
 	
 ## Role
 
