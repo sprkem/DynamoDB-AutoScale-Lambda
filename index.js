@@ -1,5 +1,5 @@
 ﻿var AWS = require('aws-sdk');
-AWS.config.apiVersions = { dynamodb: '2012-08-10' };
+AWS.config.apiVersions = { dynamodb: '2012-08-10', cloudwatch: '2010-08-01' };
 var dynamodb;
 var cloudwatch;
 
