@@ -1,0 +1,19 @@
+{
+  "name": "dynamodb-autoscaler",
+  "version": "1.0.0",
+  "description": "Automatically scales DynamoDB capacity up and down.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stevepkr84/DynamoDB-AutoScale-Lambda.git"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.1.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Steve Parker",
+  "license": "ISC"
+}

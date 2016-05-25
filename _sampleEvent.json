@@ -1,0 +1,11 @@
+﻿{
+  "version": "0",
+  "id": "2a076586-840c-4f63-869c-6afd15691e80",
+  "detail-type": "Scheduled Event",
+  "source": "aws.events",
+  "account": "123456789",
+  "time": "2016-05-20T13:27:44Z",
+  "region": "eu-west-1",
+  "resources": [ "arn:aws:events:eu-west-1:123456789:rule/hello-world" ],
+  "detail": { }
+}
