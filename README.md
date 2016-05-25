@@ -5,9 +5,9 @@ Automatically scales DynamoDB capacity up and down
 
 A simple solution to effectively scale DynamoDB capacity provisioning based. Other solutions exist, however I did not find them suitable for my requirements. The project that forced this requirement was clickstream processing, requiring highly responsive scaling, especially when scaling up.
 
-![Scaling](./scale1.png)
+![Scaling](scale1.PNG)
 
-![Scaling](./scale2.png)
+![Scaling](scale2.png)
 
 ## Usage
 
