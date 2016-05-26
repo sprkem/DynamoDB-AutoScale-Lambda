@@ -311,7 +311,7 @@ const DetermineTableUpdates = (type, tableInfo, indexInfo) => {
         var actualTime = new Date(Date.now());
         var endOfDay = new Date(actualTime.getFullYear(), actualTime.getMonth(), actualTime.getDate() + 1, 0, 0, 0);
         var timeRemainingHours = (endOfDay.getTime() - actualTime.getTime()) / 1000 / 60 / 60;
-        if (Math.max((timeRemainingHours / 6), 1) >= (4 - info.NumberOfDecreasesToday)) doChange = false;
+        if (Math.max((timeRemainingHours / 6), 1) > (4 - info.NumberOfDecreasesToday)) doChange = false;
     }
 
     // If not marked for change, we might still want to change to enforce min/max
