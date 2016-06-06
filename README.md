@@ -73,7 +73,7 @@ There is a commented out example of a specific table config row also included. T
 
 **IncrementBuffer** - The amount to scale up by. Also used as a proximity measure, meaning if the consumed value plus the buffer is above the capacity, it will take that to mean it should scale up.
 
-**DecrementPercentBarrier** - Prevents scaling down of capacity until the consumed capacity is below this percentage of the current capacity. Geared towards protecting unneccessary scale downs. Ignored when dealing with capacity below 10.
+**DecrementPercentBarrier** - Prevents scaling down of capacity until the consumed capacity is below this percentage of the current capacity. Geared towards protecting unneccessary scale downs. Ignored when dealing within 10 of the MinReads value.
 
 **DecrementMinutesBarrier** - The minimum number of minutes that must have gone by since the last capacity decrement before another can occur.
 
