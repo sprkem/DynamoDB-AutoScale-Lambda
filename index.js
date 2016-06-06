@@ -1,5 +1,5 @@
-﻿var AWS = require('aws-sdk');
-AWS.config.apiVersions = { dynamodb: '2012-08-10', cloudwatch: '2010-08-01' };
+var AWS = require('aws-sdk');
+AWS.config.apiVersions = { dynamodb: '2012-08-10' };
 var dynamodb;
 var cloudwatch;
 
@@ -306,7 +306,7 @@ const DetermineTableUpdates = (type, tableInfo, indexInfo) => {
 
         if (info.NumberOfDecreasesToday == 4) doChange = false;
         if (info.LastDecreaseDateTime >= decrementDateBarrier) doChange = false;
-        if ((desired >= 10) && (tableInfo.Config.DecrementPercentBarrier < percentageOfCurrent)) doChange = false;
+        if ((desired > (tableInfo.Config[minValueProperty] + 10)) && (tableInfo.Config.DecrementPercentBarrier < percentageOfCurrent)) doChange = false;
 
         var actualTime = new Date(Date.now());
         var endOfDay = new Date(actualTime.getFullYear(), actualTime.getMonth(), actualTime.getDate() + 1, 0, 0, 0);
