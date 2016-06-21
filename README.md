@@ -51,7 +51,7 @@ Create a new IAM role. Attach the managed policy named 'AWSLambdaBasicExecutionR
 
 ## Config
 
-The function is driven by whatever settings you place in config.js. The code comes as default with a single config line that enables scaling for all Dynamo Tables in the deployed region:
+The function is driven by whatever settings you place in config.js (or DynamoDB, see below). The code comes as default with a single config line that enables scaling for all Dynamo Tables in the deployed region:
 
 `{ Search: '.*', UseRegex: true, MinReads: 1, MaxReads: 50, MinWrites: 1, MaxWrites: 50, AssessmentMinutes: 2, IncrementBuffer: 5, DecrementPercentBarrier: 65, DecrementMinutesBarrier: 60 }`
 
@@ -79,6 +79,16 @@ There is a commented out example of a specific table config row also included. T
 
 
 In addition to these settings, the code stops scaling down based on the time of day. This is because you can only scale a table down 4 times within a UTC day. The function seeks to spread capacity decreases intelligently throughout the day so you don't end up with 20 hours stuck an unneccessarily high capacity.
+
+## Store Config in Dynamo
+
+If you need to change your config.js variables frequently, it may be desirable to put the config into DynamoDB rather that amending the deployed code. Note that if you decide to use DynamoDB, you probably want to empty out the items array in config.js. The function will load config.js first and then append config dynamo items after it. Order matters here, so config.js rules will be processed first. By default config.js contains a catch-all rule, so unless you remove it, your rules in dynamo won't have any effect.
+
+To use dynamo for config, just set the externalConfigTableName variable at the top of the code to the name of your dynamo table. The table should have a partion key (hash) of type string with a name of "Search". It should have a sort key (range) of type number with a name of Order. An example item is detailed below.
+
+![Scaling](DynamoConfig.PNG)
+
+The order value is used to determine the order by which items are loaded into the config.items array.
 
 ## Disclaimer
 
