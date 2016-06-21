@@ -8,6 +8,7 @@ var config = require('./config');
 var allTables;
 var tableConfigs;
 var changeCount;
+var externalConfigTableName = '';
 
 exports.handler = (event, context, callback) => {
 
@@ -20,6 +21,7 @@ exports.handler = (event, context, callback) => {
     changeCount = 0;
 
     GetTables()
+        .then(LoadExternalConfig)
         .then(MatchTablesWithConfig)
         .then(ProcessTables)
         .then(function () {
@@ -49,6 +51,56 @@ const GetTables = (startTable) => {
             }
         });
 
+    });
+};
+
+const LoadExternalConfig = () => {
+    return new Promise(function (resolve, reject) {
+
+        if (!externalConfigTableName || externalConfigTableName == '') {
+            resolve();
+        } else {
+
+            var params = { TableName: externalConfigTableName };
+            dynamodb.scan(params, function (err, data) {
+                if (err) {
+                    reject(err)
+                }
+                else {
+
+                    if (data.Items.length > 0) {
+                        var unsorted = [];
+                        for (var i = 0; i < data.Items.length; i++) {
+                            unsorted.push({
+                                Search: data.Items[i].Search.S,
+                                Order: data.Items[i].Order.N,
+                                UseRegex: data.Items[i].UseRegex.BOOL,                                
+                                MinReads: data.Items[i].MinReads.N,
+                                MaxReads: data.Items[i].MaxReads.N,
+                                MinWrites: data.Items[i].MinWrites.N,
+                                MaxWrites: data.Items[i].MaxWrites.N,
+                                AssessmentMinutes: data.Items[i].AssessmentMinutes.N,
+                                IncrementBuffer: data.Items[i].IncrementBuffer.N,
+                                DecrementPercentBarrier: data.Items[i].DecrementPercentBarrier.N,
+                                DecrementMinutesBarrier: data.Items[i].DecrementMinutesBarrier.N
+                            });
+                        }
+
+                        // Sort by dynamo order
+                        unsorted.sort(function (a, b) { return a.Order - b.Order });
+
+                        // Load into config array
+                        for (var i = 0; i < unsorted.length; i++) {
+                            config.items.push(unsorted[i]);
+                        }
+                    }
+
+                    resolve();
+                }
+            });
+
+
+        }
     });
 };
 
@@ -124,7 +176,7 @@ const DescribeTable = (tableInfo) => {
         var params = { TableName: tableInfo.Table };
         dynamodb.describeTable(params, function (err, data) {
             if (err) reject(err);
-            else {                
+            else {
                 if (data.Table.GlobalSecondaryIndexes && data.Table.GlobalSecondaryIndexes.length > 0) {
                     tableInfo.Indices = [];
                     for (var i = 0; i < data.Table.GlobalSecondaryIndexes.length; i++) {
