@@ -41,7 +41,10 @@ Create a new IAM role. Attach the managed policy named 'AWSLambdaBasicExecutionR
                 "dynamodb:DescribeTable",
                 "dynamodb:UpdateTable",
                 "dynamodb:Scan",
-                "cloudwatch:GetMetricStatistics"
+                "cloudwatch:GetMetricStatistics",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
             ],
             "Effect": "Allow",
             "Resource": "*"
