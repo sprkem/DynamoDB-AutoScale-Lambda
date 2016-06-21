@@ -86,7 +86,7 @@ If you need to change your config.js variables frequently, it may be desirable t
 
 To use dynamo for config, just set the externalConfigTableName variable at the top of the code to the name of your dynamo table. The table should have a partion key (hash) of type string with a name of "Search". It should have a sort key (range) of type number with a name of Order. An example item is detailed below.
 
-![Scaling](DynamoConfig.PNG)
+![Dynamo](DynamoConfig.PNG)
 
 The order value is used to determine the order by which items are loaded into the config.items array.
 
