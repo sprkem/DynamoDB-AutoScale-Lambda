@@ -84,7 +84,7 @@ In addition to these settings, the code stops scaling down based on the time of 
 
 If you need to change your config.js variables frequently, it may be desirable to put the config into DynamoDB rather that amending the deployed code. Note that if you decide to use DynamoDB, you probably want to empty out the items array in config.js. The function will load config.js first and then append config dynamo items after it. Order matters here, so config.js rules will be processed first. By default config.js contains a catch-all rule, so unless you remove it, your rules in dynamo won't have any effect.
 
-To use dynamo for config, just set the externalConfigTableName variable at the top of the code to the name of your dynamo table. The table should have a partion key (hash) of type string with a name of "Search". It should have a sort key (range) of type number with a name of Order. An example item is detailed below.
+To use dynamo for config, just set the externalConfigTableName variable at the top of the code to the name of your dynamo table containing config info. The table should have a partion key (hash) of type string with a name of "Search". It should have a sort key (range) of type number with a name of Order. An example item is detailed below.
 
 ![Dynamo](DynamoConfig.PNG)
 
