@@ -8,7 +8,7 @@ var config = require('./config');
 var allTables;
 var tableConfigs;
 var changeCount;
-var externalConfigTableName = '';
+var externalConfigTableName = 'DynamoScaleConfig';
 
 exports.handler = (event, context, callback) => {
 
@@ -73,16 +73,16 @@ const LoadExternalConfig = () => {
                         for (var i = 0; i < data.Items.length; i++) {
                             unsorted.push({
                                 Search: data.Items[i].Search.S,
-                                Order: data.Items[i].Order.N,
-                                UseRegex: data.Items[i].UseRegex.BOOL,                                
-                                MinReads: data.Items[i].MinReads.N,
-                                MaxReads: data.Items[i].MaxReads.N,
-                                MinWrites: data.Items[i].MinWrites.N,
-                                MaxWrites: data.Items[i].MaxWrites.N,
-                                AssessmentMinutes: data.Items[i].AssessmentMinutes.N,
-                                IncrementBuffer: data.Items[i].IncrementBuffer.N,
-                                DecrementPercentBarrier: data.Items[i].DecrementPercentBarrier.N,
-                                DecrementMinutesBarrier: data.Items[i].DecrementMinutesBarrier.N
+                                Order: parseInt(data.Items[i].Order.N),
+                                UseRegex: data.Items[i].UseRegex.BOOL,
+                                MinReads: parseInt(data.Items[i].MinReads.N),
+                                MaxReads: parseInt(data.Items[i].MaxReads.N),
+                                MinWrites: parseInt(data.Items[i].MinWrites.N),
+                                MaxWrites: parseInt(data.Items[i].MaxWrites.N),
+                                AssessmentMinutes: parseInt(data.Items[i].AssessmentMinutes.N),
+                                IncrementBuffer: parseInt(data.Items[i].IncrementBuffer.N),
+                                DecrementPercentBarrier: parseInt(data.Items[i].DecrementPercentBarrier.N),
+                                DecrementMinutesBarrier: parseInt(data.Items[i].DecrementMinutesBarrier.N)
                             });
                         }
 
