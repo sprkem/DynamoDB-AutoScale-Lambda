@@ -8,7 +8,9 @@ var config = require('./config');
 var allTables;
 var tableConfigs;
 var changeCount;
-var externalConfigTableName = 'DynamoScaleConfig';
+
+// Set to dynamo table name to load config from there
+var externalConfigTableName = ''; 
 
 exports.handler = (event, context, callback) => {
 
