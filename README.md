@@ -1,6 +1,16 @@
 # Dynamo-AutoScale-Lambda
 Automatically scales DynamoDB capacity up and down
 
+## Coming shortly
+
+Shortly I will update this repo with some updates I've made. These changes are currently being tested.
+
+The first change is to split the IncrementBuffer into read and write values to give more control. 
+
+Secondly I've added a config field called NoScaleDownHours, which is an array of numbers. Adding values here prevents any scaling down during those hours (UTC). This is useful during multiple hour spikes where you want to delay the scale down until traffic has properly settled at normal levels. 
+
+Finally I've added an IncrementBuffer modifier allowing you to modify the increment buffer at certain hours of the day. For example I can say I want the buffer to increase by 30 value during certain hours of the day. You can do this for reads and/or writes per table. The value here is if you have predictable traffic spikes, you can artifically scale up at certain times, essentially being proactive rather than reactive. This adds value as it can sometimes take a little time to scale up to the required capacity, especially if you have complex scenarios where multiple tables can be bottlenecks for each other.
+
 ## Purpose
 
 A simple solution to effectively scale DynamoDB capacity provisioning. Other solutions exist, however I did not find them suitable for my requirements. The project that forced this requirement was clickstream processing, requiring highly responsive scaling, especially when scaling up.
