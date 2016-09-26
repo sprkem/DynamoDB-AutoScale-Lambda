@@ -1,16 +1,6 @@
 # Dynamo-AutoScale-Lambda
 Automatically scales DynamoDB capacity up and down
 
-## Coming shortly
-
-Shortly I will update this repo with some updates I've made. These changes are currently being tested.
-
-The first change is to split the IncrementBuffer into read and write values to give more control. 
-
-Secondly I've added a config field called NoScaleDownHours, which is an array of numbers. Adding values here prevents any scaling down during those hours (UTC). This is useful during multiple hour spikes where you want to delay the scale down until traffic has properly settled at normal levels. 
-
-Finally I've added an IncrementBuffer modifier allowing you to modify the increment buffer at certain hours of the day. For example I can say I want the buffer to increase by 30 value during certain hours of the day. You can do this for reads and/or writes per table. The value here is if you have predictable traffic spikes, you can artifically scale up at certain times, essentially being proactive rather than reactive. This adds value as it can sometimes take a little time to scale up to the required capacity, especially if you have complex scenarios where multiple tables can be bottlenecks for each other.
-
 ## Purpose
 
 A simple solution to effectively scale DynamoDB capacity provisioning. Other solutions exist, however I did not find them suitable for my requirements. The project that forced this requirement was clickstream processing, requiring highly responsive scaling, especially when scaling up.
@@ -83,13 +73,23 @@ There is a commented out example of a specific table config row also included. T
 
 **MaxWrites** - The maximum number of writes a table or index should have.
 
+**NoScaleDownHours** - An array of numbers indicating hours of the day (UTC) where scaling down should not occur. E.g "[5,6]". Since you can only scale down 4 times per UTC day, this property can manage scenarios with highly variable traffic. If for example you had predictably large drops in traffic at 1300 hrs and again at 1400 hrs - you may wish to prevent scale downs until 1400 hrs so that you don't run short.
+
 **AssessmentMinutes** - The number of minutes of CloudWatch metrics to average in order to determine the current consumption. Do not set below 2. Querying CloudWatch for 1 minutes of metrics often results in no data, which may result in scaling down. This value strongly affects the sensitivity of scaling. A higher value may result in short term spikes being ignored.
 
-**IncrementBuffer** - The amount to scale up by. Also used as a proximity measure, meaning if the consumed value plus the buffer is above the capacity, it will take that to mean it should scale up.
+**IncrementBufferReads** - The amount to scale reads up by. Also used as a proximity measure, meaning if the consumed value plus the buffer is above the capacity, it will take that to mean it should scale up.
+
+**IncrementBufferWrites** - The amount to scale reads up by. Also used as a proximity measure, meaning if the consumed value plus the buffer is above the capacity, it will take that to mean it should scale up.
+
+**IncremementBufferHourModifiers** - Although this function is reactive to scaling needs, sometimes it is not reactive enough for the desired effect. In a scenario where you have predictable spikes, you may wish to change the buffer value in advance and without manual intervention. Using this property you can specify a value e.g [{"H":12, "B":15, "T":"read"}] - this will cause IncrementBufferReads to be increased by 15 during the 12th hour of the day (UTC). The T property can be "read" or "write". As indicated by the format, an array of values can be included for multiple modifications.
 
 **DecrementPercentBarrier** - Prevents scaling down of capacity until the consumed capacity is below this percentage of the current capacity. Geared towards protecting unneccessary scale downs. Ignored when dealing within 10 of the MinReads value.
 
 **DecrementMinutesBarrier** - The minimum number of minutes that must have gone by since the last capacity decrement before another can occur.
+
+**ScaleReads** - Optional (default true). This value is a flat toggle of whether the function should scale Reads for the table.
+
+**ScaleWrites** - Optional (default true). This value is a flat toggle of whether the function should scale Writes for the table.
 
 
 In addition to these settings, the code stops scaling down based on the time of day. This is because you can only scale a table down 4 times within a UTC day. The function seeks to spread capacity decreases intelligently throughout the day so you don't end up with 20 hours stuck an unneccessarily high capacity.
