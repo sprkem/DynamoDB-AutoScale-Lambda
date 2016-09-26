@@ -8,9 +8,7 @@ var config = require('./config');
 var allTables;
 var tableConfigs;
 var changeCount;
-
-// Set to dynamo table name to load config from there
-var externalConfigTableName = ''; 
+var externalConfigTableName = '';
 
 exports.handler = (event, context, callback) => {
 
@@ -82,9 +80,14 @@ const LoadExternalConfig = () => {
                                 MinWrites: parseInt(data.Items[i].MinWrites.N),
                                 MaxWrites: parseInt(data.Items[i].MaxWrites.N),
                                 AssessmentMinutes: parseInt(data.Items[i].AssessmentMinutes.N),
-                                IncrementBuffer: parseInt(data.Items[i].IncrementBuffer.N),
+                                IncrementBufferReads: parseInt(data.Items[i].IncrementBufferReads.N),
+                                IncrementBufferWrites: parseInt(data.Items[i].IncrementBufferWrites.N),
                                 DecrementPercentBarrier: parseInt(data.Items[i].DecrementPercentBarrier.N),
-                                DecrementMinutesBarrier: parseInt(data.Items[i].DecrementMinutesBarrier.N)
+                                DecrementMinutesBarrier: parseInt(data.Items[i].DecrementMinutesBarrier.N),
+                                NoScaleDownHours: data.Items[i].NoScaleDownHours ? JSON.parse(data.Items[i].NoScaleDownHours.S) : [],
+                                IncremementBufferHourModifiers: data.Items[i].IncremementBufferHourModifiers ? JSON.parse(data.Items[i].IncremementBufferHourModifiers.S) : [],
+                                ScaleReads: data.Items[i].ScaleReads ? data.Items[i].ScaleReads.BOOL : true,
+                                ScaleWrites: data.Items[i].ScaleWrites ? data.Items[i].ScaleWrites.BOOL : true,
                             });
                         }
 
@@ -301,7 +304,7 @@ const UpdateTableCapacity = (tableInfo) => {
 
             var params = { TableName: action.Table };
             if (action.Read.IsChange || action.Write.IsChange)
-                params.ProvisionedThroughput = { ReadCapacityUnits: action.Read.NewValue, WriteCapacityUnits: action.Write.NewValue }
+                params.ProvisionedThroughput = { ReadCapacityUnits: action.Read.NewValue, WriteCapacityUnits: action.Write.NewValue };
 
             if (action.Indices && action.Indices.length > 0) {
 
@@ -338,17 +341,30 @@ const DetermineTableUpdates = (type, tableInfo, indexInfo) => {
     var minValueProperty = type == 'read' ? 'MinReads' : 'MinWrites';
     var maxValueProperty = type == 'read' ? 'MaxReads' : 'MaxWrites';
 
+    // Skip if the ScaleReads or ScaleWrites (accordingly) property has been set to false. Return with the current capacity
+    if (type == 'read' && typeof tableInfo.Config.ScaleReads === 'boolean' && tableInfo.Config.ScaleReads === false) return { IsChange: false, NewValue: info[currentCapacityProperty] };
+    if (type == 'write' && typeof tableInfo.Config.ScaleWrites === 'boolean' && tableInfo.Config.ScaleWrites === false) return { IsChange: false, NewValue: info[currentCapacityProperty] };
+
     var consumed = 0;
     var desired = 0;
     var direction = '';
     var doChange = true;
 
+    var actualTime = new Date(Date.now());
+    var hour = actualTime.getHours();
+    var incrementBuffer = type == 'read' ? tableInfo.Config.IncrementBufferReads : tableInfo.Config.IncrementBufferWrites;
+
+    for (var i = 0; i < tableInfo.Config.IncremementBufferHourModifiers.length; i++) {
+        if (tableInfo.Config.IncremementBufferHourModifiers[i].H == hour && tableInfo.Config.IncremementBufferHourModifiers[i].T == type)
+            incrementBuffer += tableInfo.Config.IncremementBufferHourModifiers[i].B;
+    }
+
     // Calc table actions
     consumed = info[consumedProperty] || 0;
-    if ((consumed > 1) && (consumed + tableInfo.Config.IncrementBuffer > info[currentCapacityProperty])) direction = 'up'; else direction = 'down';
+    if ((consumed > 1) && (consumed + incrementBuffer > info[currentCapacityProperty])) direction = 'up'; else direction = 'down';
 
     if (direction === 'up') {
-        desired = Math.min(Math.ceil(consumed + tableInfo.Config.IncrementBuffer), tableInfo.Config[maxValueProperty]);
+        desired = Math.min(Math.ceil(consumed + incrementBuffer), tableInfo.Config[maxValueProperty]);
     }
     else if (direction === 'down') {
 
@@ -361,11 +377,10 @@ const DetermineTableUpdates = (type, tableInfo, indexInfo) => {
         if (info.NumberOfDecreasesToday == 4) doChange = false;
         if (info.LastDecreaseDateTime >= decrementDateBarrier) doChange = false;
         if ((desired > (tableInfo.Config[minValueProperty] + 10)) && (tableInfo.Config.DecrementPercentBarrier < percentageOfCurrent)) doChange = false;
-
-        var actualTime = new Date(Date.now());
         var endOfDay = new Date(actualTime.getFullYear(), actualTime.getMonth(), actualTime.getDate() + 1, 0, 0, 0);
         var timeRemainingHours = (endOfDay.getTime() - actualTime.getTime()) / 1000 / 60 / 60;
         if (Math.max((timeRemainingHours / 6), 1) > (4 - info.NumberOfDecreasesToday)) doChange = false;
+        if (tableInfo.Config.NoScaleDownHours.indexOf(hour) > -1) doChange = false;
     }
 
     // If not marked for change, we might still want to change to enforce min/max
