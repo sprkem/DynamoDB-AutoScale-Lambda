@@ -1,3 +1,7 @@
+# Disclaimer notice:
+
+I have come to realise that this lambda may cause some high charges. This is due to the number of calls made to getMetricStatistics, which are not free. This can be mitigated by running it less frequently than the 1 minute rate described below, but obviously this is not a solution. I will look into alternative approaches, but in the meantime I must advise against using this code without due caution.
+
 # Dynamo-AutoScale-Lambda
 Automatically scales DynamoDB capacity up and down
 
